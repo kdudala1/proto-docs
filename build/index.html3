@@ -1,0 +1,439 @@
+<h1 id="the-basics">THE BASICS</h1>
+
+<p>Welcome to the Ops Manager API! You can use our API to access endpoints, which can create, read, update, and delete resources in Ops Manager.</p>
+
+<p>We have language bindings in cURL, Ruby, and Python! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.</p>
+
+<h2 id="authentication">Authentication</h2>
+
+<p>You must pass a token to each API endpoint. To get a token, and curl an API endpoint using that token, follow these instructions:</p>
+
+<blockquote>
+<p>From a command line with Ruby installed, install the cf-uaac gem:</p>
+</blockquote>
+<pre class="highlight shell"><code>gem install cf-uaac
+</code></pre>
+
+<blockquote>
+<p>Target your Ops Manager IP:</p>
+</blockquote>
+<pre class="highlight shell"><code>uaac target https://YOUR_OPSMAN_IP/uaa
+</code></pre>
+
+<blockquote>
+<p>Log in to your Ops Manager with the Client name &ldquo;opsman&rdquo;:</p>
+</blockquote>
+<pre class="highlight shell"><code>uaac token owner get
+
+Client name: opsman
+Client secret:
+User name: YOUR_USERNAME_HERE
+Password: YOUR_PASSWORD_HERE
+</code></pre>
+
+<blockquote>
+<p>Retrieve your Ops Manager access token:</p>
+</blockquote>
+<pre class="highlight shell"><code>uaac context
+</code></pre>
+
+<p>Ops Manager uses authorization tokens to allow access to the API. You can get an authorization token from the <a href="https://10.85.43.43/settings/edit">settings page</a> or by using the uaac command line tool (instructions to the right).</p>
+
+<p>Ops Manager expects for the API key to be included in all API requests to the server in a header that looks like the following:</p>
+
+<p><code class="prettyprint">Authorization: Bearer YOUR_ACCESS_TOKEN</code></p>
+
+<aside class="warning">
+You must replace <code>YOUR_ACCESS_TOKEN</code> with your personal API authorization token.
+</aside>
+
+<h2 id="ops-manager-workflow">Ops Manager workflow</h2>
+
+<p>Available &mdash;&gt; Staged &mdash;&gt; Deployed</p>
+
+<p>The Staged and Deployed namespaces refer to the desired and actual states of the Ops Manager installation. Most changes to an Ops Manager installation require triggering an &ldquo;Apply Changes&rdquo; action in order to take effect. Applying changes effectively makes the staged and deployed states identical until the next round of changes is made.</p>
+
+<p>For example, when changes are made to a product, these changes are associated with the product in the Staged namespace, and triggering an &ldquo;Apply Changes&rdquo; action deploys these changes. </p>
+
+<h2 id="product-life-cycle">Product life cycle</h2>
+
+<h2 id="status-codes">Status codes</h2>
+
+<p>Ops Manager uses conventional HTTP response codes to indicate the success or failure of an API request. Generally, codes in the 2xx range indicate success, codes in the 4xx range indicate an error that failed given the information provided (e.g., a required parameter was omitted), and codes in the 5xx range indicate an error with the Ops Manager server.</p>
+
+<table><thead>
+<tr>
+<th>Code</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>200 - OK</td>
+<td>Everything worked as expected</td>
+</tr>
+<tr>
+<td>404 - not found</td>
+<td>The route requested does not exist</td>
+</tr>
+<tr>
+<td>400 - bad request</td>
+<td>The request is syntactically incorrect</td>
+</tr>
+<tr>
+<td>401 - unauthorized</td>
+<td>The access token has expired or is invalid</td>
+</tr>
+<tr>
+<td>409 - conflict</td>
+<td>Another user is logged in</td>
+</tr>
+<tr>
+<td>422 - unprocessable entity</td>
+<td>The request is syntactically correct but the supplied values do not work</td>
+</tr>
+<tr>
+<td>500 - internal server error</td>
+<td>Something went wrong with our server</td>
+</tr>
+<tr>
+<td>503 - service unavailable</td>
+<td>The authentication service is not available yet</td>
+</tr>
+</tbody></table>
+
+<h1 id="common-tasks">COMMON TASKS</h1>
+
+<h2 id="setting-up-ops-manager">Setting up Ops Manager</h2>
+
+<h2 id="configuring-bosh-director">Configuring BOSH director</h2>
+
+<h2 id="importing-and-installing-products">Importing and installing products</h2>
+
+<h2 id="configuring-products">Configuring products</h2>
+
+<h2 id="upgrading-products">Upgrading products</h2>
+
+<h2 id="viewing-logs-and-credentials">Viewing logs and credentials</h2>
+
+<h1 id="core-concepts">CORE CONCEPTS</h1>
+
+<h2 id="setup">Setup</h2>
+<pre class="highlight shell"><code>curl <span class="s2">"https://example.com/api/v0/setup"</span> -d <span class="s1">'setup[decryption_passphrase]=passphrase&amp;setup[decryption_passphrase_confirmation]=passphrase&amp;setup[eula_accepted]=true&amp;setup[identity_provider]=saml&amp;setup[idp_metadata]=%3Cvalid_xml%3E%3C%2Fvalid_xml%3E'</span> -X POST <span class="se">\</span>
+    -H <span class="s2">"Content-Type: application/x-www-form-urlencoded"</span>
+</code></pre>
+<pre class="highlight plaintext"><code>Example Response
+</code></pre>
+<pre class="highlight http"><code><span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+
+setup[decryption_passphrase]=passphrase&amp;setup[decryption_passphrase_confirmation]=passphrase&amp;setup[eula_accepted]=true&amp;setup[identity_provider]=saml&amp;setup[idp_metadata]=%3Cvalid_xml%3E%3C%2Fvalid_xml%3E
+</code></pre>
+
+<h4 id="http-request">HTTP Request</h4>
+
+<p><code class="prettyprint">POST /api/v0/setup</code></p>
+
+<h3 id="setting-up-ops-manager-with-saml">Setting up Ops Manager with SAML</h3>
+
+<h4 id="query-parameters">Query Parameters</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>setup[decryption_passphrase]</td>
+<td>Decryption passphrase</td>
+</tr>
+<tr>
+<td>setup[decryption_passphrase_confirmation]</td>
+<td>Confirm decryption passphrase</td>
+</tr>
+<tr>
+<td>setup[eula_accepted]</td>
+<td>Accept EULA</td>
+</tr>
+<tr>
+<td>setup[identity_provider]</td>
+<td>Using SAML as our identity provider</td>
+</tr>
+<tr>
+<td>setup[idp_metadata]</td>
+<td>URL or XML for idp_metadata</td>
+</tr>
+</tbody></table>
+
+<hr>
+<pre class="highlight shell"><code>curl <span class="s2">"https://example.com/api/v0/setup"</span> -d <span class="s1">'setup[decryption_passphrase]=passphrase&amp;setup[decryption_passphrase_confirmation]=passphrase&amp;setup[eula_accepted]=true&amp;setup[identity_provider]=internal&amp;setup[admin_user_name]=user-ed942e358eb61868dc87&amp;setup[admin_password]=password&amp;setup[admin_password_confirmation]=password'</span> -X POST <span class="se">\</span>
+    -H <span class="s2">"Content-Type: application/x-www-form-urlencoded"</span>
+</code></pre>
+<pre class="highlight plaintext"><code>Example Response
+</code></pre>
+<pre class="highlight http"><code><span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+
+setup[decryption_passphrase]=passphrase&amp;setup[decryption_passphrase_confirmation]=passphrase&amp;setup[eula_accepted]=true&amp;setup[identity_provider]=internal&amp;setup[admin_user_name]=user-ed942e358eb61868dc87&amp;setup[admin_password]=password&amp;setup[admin_password_confirmation]=password
+</code></pre>
+
+<h4 id="http-request">HTTP Request</h4>
+
+<p><code class="prettyprint">POST /api/v0/setup</code></p>
+
+<h3 id="setting-up-ops-manager-with-an-internal-userstore">Setting up Ops Manager with an internal userstore</h3>
+
+<h4 id="query-parameters">Query Parameters</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>setup[decryption_passphrase]</td>
+<td>Decryption passphrase</td>
+</tr>
+<tr>
+<td>setup[decryption_passphrase_confirmation]</td>
+<td>Confirm decryption passphrase</td>
+</tr>
+<tr>
+<td>setup[eula_accepted]</td>
+<td>Accept EULA</td>
+</tr>
+<tr>
+<td>setup[identity_provider]</td>
+<td>Using internal as our identity provider</td>
+</tr>
+<tr>
+<td>setup[admin_user_name]</td>
+<td>User name</td>
+</tr>
+<tr>
+<td>setup[admin_password]</td>
+<td>Password</td>
+</tr>
+<tr>
+<td>setup[admin_password_confirmation]</td>
+<td>Confirm password</td>
+</tr>
+</tbody></table>
+
+<h2 id="viewing-triggering-events">Viewing/Triggering Events</h2>
+
+<h3 id="getting-a-list-of-recent-install-events">Getting a list of recent install events</h3>
+
+<p>Status will be ‘running’, ‘succeeded’, or ‘failed’.</p>
+<pre class="highlight shell"><code>curl <span class="s2">"https://example.com/api/v0/installations"</span> -X GET <span class="se">\</span>
+    -H <span class="s2">"Authorization: Bearer UAA_ACCESS_TOKEN"</span>
+</code></pre>
+<pre class="highlight plaintext"><code>Example Response
+</code></pre>
+<pre class="highlight http"><code><span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+
+{
+  "installations": [
+    {
+      "user_name": "admin",
+      "finished_at": null,
+      "status": "running",
+      "id": 3
+    },
+    {
+      "user_name": "admin",
+      "finished_at": "2016-04-10T15:14:45.488Z",
+      "status": "succeeded",
+      "id": 2
+    }
+  ]
+}
+</code></pre>
+
+<h4 id="http-request">HTTP Request</h4>
+
+<p><code class="prettyprint">GET /api/v0/installations</code></p>
+
+<hr>
+
+<h3 id="getting-the-status-of-an-install-process">Getting the status of an install process</h3>
+<pre class="highlight shell"><code>curl <span class="s2">"https://example.com/api/v0/installations/4"</span> -X GET <span class="se">\</span>
+    -H <span class="s2">"Authorization: Bearer UAA_ACCESS_TOKEN"</span>
+</code></pre>
+<pre class="highlight plaintext"><code>Example Response
+</code></pre>
+<pre class="highlight http"><code><span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+
+{
+  "status": "running"
+}
+</code></pre>
+
+<h4 id="http-request">HTTP Request</h4>
+
+<p><code class="prettyprint">GET /api/v0/installations/:id</code></p>
+
+<h3 id="triggering-an-install-process">Triggering an install process</h3>
+
+<hr>
+<pre class="highlight shell"><code>curl <span class="s2">"https://example.com/api/v0/installations"</span> -d <span class="s1">'enabled_errands[product_1_guid][pre_delete_errands][]=a&amp;enabled_errands[product_1_guid][pre_delete_errands][]=b&amp;enabled_errands[product_2_guid][post_deploy_errands][]=c&amp;enabled_errands[product_2_guid][post_deploy_errands][]=d'</span> -X POST <span class="se">\</span>
+    -H <span class="s2">"Authorization: Bearer UAA_ACCESS_TOKEN"</span> <span class="se">\</span>
+    -H <span class="s2">"Content-Type: application/x-www-form-urlencoded"</span>
+</code></pre>
+<pre class="highlight plaintext"><code>Example Response
+</code></pre>
+<pre class="highlight http"><code><span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+
+{
+  "install": {
+    "id": 1
+  }
+}
+</code></pre>
+
+<h4 id="http-request">HTTP Request</h4>
+
+<p><code class="prettyprint">POST /api/v0/installations</code></p>
+
+<h4 id="query-parameters">Query Parameters</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>ignore_warnings</td>
+<td>When true, bypass warnings from ignorable verifiers</td>
+</tr>
+<tr>
+<td>enabled_errands</td>
+<td>Hash of products with their enabled errands</td>
+</tr>
+</tbody></table>
+
+<h2 id="staged-bosh-director">Staged BOSH Director</h2>
+
+<h2 id="deployed-bosh-director">Deployed BOSH Director</h2>
+
+<h3 id="get-credentials-for-a-deployed-director">Get credentials for a deployed director</h3>
+
+<h3 id="get-status-for-a-deployed-director">Get status for a deployed director</h3>
+
+<h3 id="get-logs-for-a-deployed-director">Get logs for a deployed director</h3>
+
+<h3 id="get-manifest-for-a-deployed-director">Get manifest for a deployed director</h3>
+
+<p>Use the following request to retrieve the currently deployed bosh director manifest</p>
+<pre class="highlight shell"><code>curl <span class="s2">"https://YOUR_OPSMANAGER_IP/api/v0/staged/director/manifest"</span> -X GET -H <span class="s2">"Authorization: Bearer YOUR_ACCESS_TOKEN"</span>
+</code></pre>
+
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+
+<p>This endpoint retrieves the bosh director manifest.</p>
+
+<h4 id="http-request">HTTP Request</h4>
+
+<p>GET /api/v0/staged/director/manifest</p>
+
+<aside class="success">
+Remember — a happy kitten is an authenticated kitten!
+</aside>
+
+<h2 id="available-products">Available Products</h2>
+
+<h3 id="uploading-products">Uploading products</h3>
+
+<p>Products (.pivotal files) can be uploaded to Ops Manager via the API </p>
+<pre class="highlight shell"><code>curl <span class="s2">"https://example.com/api/v0/products"</span> -F <span class="s1">'product[file]=@PRODUCT_FILENAME.pivotal'</span> -X POST
+  -H <span class="s2">"Authorization: Bearer UAA_ACCESS_TOKEN"</span>
+</code></pre>
+
+<h4 id="http-request">HTTP Request</h4>
+
+<p>POST /api/v0/products</p>
+
+<h3 id="deleting-unused-products">Deleting unused products</h3>
+
+<p>Products (.pivotal files) can be uploaded to Ops Manager via the API </p>
+<pre class="highlight shell"><code>curl <span class="s2">"https://example.com/api/v0/products"</span> -F <span class="s1">'product[file]=@PRODUCT_FILENAME.pivotal'</span> -X POST
+  -H <span class="s2">"Authorization: Bearer UAA_ACCESS_TOKEN"</span>
+</code></pre>
+
+<h4 id="http-request">HTTP Request</h4>
+
+<p>POST /api/v0/products</p>
+
+<h2 id="staged-products">Staged Products</h2>
+
+<h3 id="move-products-to-the-staged-namespace">Move products to the staged namespace</h3>
+
+<h3 id="get-current-resource-configuration-for-a-staged-product">Get current resource configuration for a staged product</h3>
+
+<h3 id="configure-resources-for-a-staged-product">Configure resources for a staged product</h3>
+
+<h3 id="get-networks-and-azs-for-a-staged-product">Get networks and azs for a staged product</h3>
+
+<h3 id="configure-networks-and-azs-for-a-staged-product">Configure networks and azs for a staged product</h3>
+
+<h3 id="get-currently-selected-errands-for-a-staged-product">Get currently selected errands for a staged product</h3>
+
+<h3 id="configure-errands-for-a-staged-product">Configure errands for a staged product</h3>
+
+<h3 id="configure-other-properties-for-a-staged-product">Configure other properties for a staged product</h3>
+
+<h3 id="get-manifest-for-a-staged-product">Get manifest for a staged product</h3>
+
+<h4 id="http-request">HTTP Request</h4>
+
+<p>POST /api/v0/products</p>
+
+<h2 id="deployed-products">Deployed Products</h2>
+
+<h3 id="get-credentials-for-a-deployed-product">Get credentials for a deployed product</h3>
+
+<h3 id="get-status-for-a-deployed-product">Get status for a deployed product</h3>
+
+<h3 id="get-logs-for-a-deployed-product">Get logs for a deployed product</h3>
+
+<h3 id="get-manifest-for-a-deployed-product">Get manifest for a deployed product</h3>
+
+<h3 id="mark-a-product-for-deletion">Mark a product for deletion</h3>
+
+<h2 id="stemcells">Stemcells</h2>
+
+<h3 id="uploading-stemcells">Uploading stemcells</h3>
+
+<h3 id="deleting-stemcells">Deleting stemcells</h3>
+
+<h2 id="disk-amp-vm-types">Disk &amp; VM types</h2>
+
+<h3 id="disk-types">Disk types</h3>
+
+<h3 id="vm-types">VM types</h3>
+
+<h2 id="export-or-retire-an-installation">Export or Retire an Installation</h2>
+
+<h3 id="export-your-installation">Export your installation</h3>
+
+<h3 id="delete-your-installation">Delete your installation</h3>
+
+<h1 id="advanced">ADVANCED</h1>
+
+<h2 id="settings">Settings</h2>
+
+<h3 id="uaa">UAA</h3>
+
+<h3 id="pivotal-network">Pivotal Network</h3>
+
+<h2 id="metadata">Metadata</h2>
+
+<h3 id="migrating-metadata">Migrating metadata</h3>
+
+<h3 id="uploading-metadata">Uploading metadata</h3>
+
+<h2 id="generating-manifests">Generating manifests</h2>
+
+<h2 id="uploading-releases">Uploading releases</h2>
